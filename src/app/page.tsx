@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -62,6 +63,10 @@ export default function Home() {
           >
             Documentation
           </a>
+
+          <button className="bg-white text-black p-2 rounded-xl">
+            <Link href={"/users"}>Users</Link>
+          </button>
         </div>
       </main>
     </div>
