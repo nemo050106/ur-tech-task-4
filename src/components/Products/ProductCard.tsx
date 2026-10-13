@@ -1,6 +1,5 @@
-"use client";
-
 import React from "react";
+import Link from "next/link";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -9,10 +8,15 @@ import { formatPrice } from "@/lib/product";
 
 export interface ProductCardProps {
   product: Product;
-  onSelect?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, onSelect }: ProductCardProps) {
+/**
+ * ProductCard component
+ * 
+ * Displays individual product card in the responsive grid.
+ * Links directly to the dynamic detail page at /products/[id].
+ */
+export default function ProductCard({ product }: ProductCardProps) {
   const formattedDate = new Date(product.createdAt).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -22,7 +26,7 @@ export default function ProductCard({ product, onSelect }: ProductCardProps) {
   return (
     <Card hoverable className="group flex flex-col justify-between p-5 transition-all duration-200">
       <div>
-        {/* Top: Category & Stock Badge */}
+        {/* Category tag & stock status badge */}
         <div className="flex items-start justify-between gap-2">
           <span className="inline-flex rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
             {product.category}
@@ -30,19 +34,21 @@ export default function ProductCard({ product, onSelect }: ProductCardProps) {
           <Badge stock={product.stock} />
         </div>
 
-        {/* Product Name */}
+        {/* Product Title linking to detail page /products/[id] */}
         <h3 className="mt-3 text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2">
-          {product.name}
+          <Link href={`/products/${product.id}`} className="hover:underline">
+            {product.name}
+          </Link>
         </h3>
 
-        {/* SKU & Date info */}
+        {/* Product SKU and added date */}
         <div className="mt-1 flex items-center justify-between text-[11px] text-slate-400">
           <span>SKU #{product.id}</span>
           <span>Added {formattedDate}</span>
         </div>
       </div>
 
-      {/* Bottom: Price & Stock details + Action */}
+      {/* Pricing, stock, and link to detail page */}
       <div className="mt-5 border-t border-slate-100 pt-4">
         <div className="flex items-baseline justify-between">
           <div>
@@ -58,27 +64,31 @@ export default function ProductCard({ product, onSelect }: ProductCardProps) {
             <p className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
               Stock
             </p>
-            <p className={`text-sm font-bold ${
-              product.stock === 0
-                ? "text-rose-600"
-                : product.stock <= 5
-                ? "text-amber-600"
-                : "text-slate-700"
-            }`}>
+            <p
+              className={`text-sm font-bold ${
+                product.stock === 0
+                  ? "text-rose-600"
+                  : product.stock <= 5
+                  ? "text-amber-600"
+                  : "text-slate-700"
+              }`}
+            >
               {product.stock} units
             </p>
           </div>
         </div>
 
+        {/* Detail page action button */}
         <div className="mt-4">
-          <Button
-            variant={product.stock === 0 ? "secondary" : "outline"}
-            size="sm"
-            className="w-full"
-            onClick={() => onSelect?.(product)}
-          >
-            {product.stock === 0 ? "Restock Request" : "Manage Product"}
-          </Button>
+          <Link href={`/products/${product.id}`} className="block w-full">
+            <Button
+              variant={product.stock === 0 ? "secondary" : "outline"}
+              size="sm"
+              className="w-full"
+            >
+              View Details &rarr;
+            </Button>
+          </Link>
         </div>
       </div>
     </Card>
