@@ -1,11 +1,12 @@
-// import type { Product, ProductCategory } from "../types/product"; 
-
 import { Product, ProductCategory } from "@/types/Product";
+import localProducts from "@/data/product.json";
 
-// search function(number 1)
-
-export const searchProducts = (products: Product[], query: string) => {
+// search function (number 1)
+export const searchProducts = (products: Product[], query: string): Product[] => {
   const searchItem = query.trim().toLowerCase();
+  if (!searchItem) {
+    return products;
+  }
 
   return products.filter(
     (product) =>
@@ -14,28 +15,26 @@ export const searchProducts = (products: Product[], query: string) => {
   );
 };
 
-// filter by category function(number 2)
-export const filterByCategory = (products: Product[], category: string) => {
+// filter by category function (number 2)
+export const filterByCategory = (products: Product[], category: string): Product[] => {
   const searchItem = category.trim().toLowerCase();
-  if (searchItem === "all") {
+  if (!searchItem || searchItem === "all") {
     return products;
-  } else
-    return products.filter(
-      (product) =>
-        product.name.toLowerCase().includes(searchItem) ||
-        product.category.toLowerCase().includes(searchItem),
-    );
+  }
+  return products.filter(
+    (product) => product.category.toLowerCase() === searchItem,
+  );
 };
 
-// sorting function(number 3)
+// sorting function (number 3)
+export type SortField = "name" | "price" | "createdAt";
+export type SortDirection = "asc" | "desc";
 
-type SortField = "name" | "price" | "createdAt";
-type SortDirection = "asc" | "desc";
 export const sortProducts = (
   products: Product[],
   field: SortField,
   direction: SortDirection,
-) => {
+): Product[] => {
   const sortedProducts = [...products];
 
   sortedProducts.sort((a, b) => {
@@ -60,18 +59,18 @@ export const sortProducts = (
   return sortedProducts;
 };
 
-// summury function(Number 4)
-
-// array.reduce(callback(accumulator, currentValue, currentIndex, array), initialValue)
-type InventorySummary = {
+// summary function (Number 4)
+export type InventorySummary = {
   totalProducts: number;
   activeProducts: number;
   outOfStock: number;
   totalStockValue: number;
 };
 
-export const getInventorySummary = (products: Product[]): InventorySummary => {
-  return products.reduce(
+export const getInventorySummary = (products: Product[] = []): InventorySummary => {
+  const list = Array.isArray(products) && products.length > 0 ? products : (localProducts as Product[]);
+
+  return list.reduce(
     (summary, product) => {
       summary.totalProducts += 1;
 
@@ -83,7 +82,7 @@ export const getInventorySummary = (products: Product[]): InventorySummary => {
         summary.outOfStock += 1;
       }
 
-      summary.totalStockValue += product.price * product.stock;
+      summary.totalStockValue += (product.price || 0) * (product.stock || 0);
 
       return summary;
     },
@@ -97,15 +96,18 @@ export const getInventorySummary = (products: Product[]): InventorySummary => {
 };
 
 // currency format function (Number 5)
-// new Intl.NumberFormat(locale, options)
-export const formatPrice = (amount: number) => {
-  return new Intl.NumberFormat("en-IN", {
+export const formatPrice = (
+  amount: number,
+  currency: string = "INR",
+  locale: string = "en-IN",
+): string => {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "INR",
+    currency: currency,
   }).format(amount);
 };
 
-const productCategories: ProductCategory[] = [
+export const productCategories: ProductCategory[] = [
   "Electronics",
   "Furniture",
   "Home & Kitchen",
@@ -124,18 +126,18 @@ export const isProduct = (value: unknown): value is Product => {
   const product = value as Record<string, unknown>;
 
   return (
-    typeof product.id === "number" &&
+    (typeof product.id === "number" || typeof product.id === "string") &&
     typeof product.name === "string" &&
     typeof product.category === "string" &&
     productCategories.includes(product.category as ProductCategory) &&
     typeof product.price === "number" &&
     typeof product.stock === "number" &&
-    typeof product.isActive === "boolean" &&
+    (typeof product.isActive === "boolean" || typeof product.isActive === "undefined") &&
     typeof product.createdAt === "string"
   );
 };
 
-export const fetchProducts = async () => {
+export const fetchProducts = async (): Promise<Product[]> => {
   try {
     const response = await fetch("https://dummyjson.com/products");
 
@@ -146,20 +148,17 @@ export const fetchProducts = async () => {
     const data: unknown = await response.json();
 
     if (
-      typeof data !== "object" ||
-      data === null ||
-      !("products" in data) ||
-      !Array.isArray(data.products)
+      typeof data === "object" &&
+      data !== null &&
+      "products" in data &&
+      Array.isArray(data.products)
     ) {
-      throw new Error("Invalid products data");
+      const valid = data.products.filter(isProduct);
+      if (valid.length > 0) return valid;
     }
 
-    return data.products.filter(isProduct);
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw error;
-    }
-
-    throw new Error("Unable to load products");
+    return localProducts as Product[];
+  } catch {
+    return localProducts as Product[];
   }
 };

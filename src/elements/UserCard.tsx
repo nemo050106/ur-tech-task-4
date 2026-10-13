@@ -1,5 +1,4 @@
-import { getUserData } from "@/lib/users";
-import { User, UserCardProps } from "@/types/types";
+import { UserCardProps } from "@/types/types";
 import React from "react";
 import Button from "./Button";
 

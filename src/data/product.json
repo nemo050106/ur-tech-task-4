@@ -178,5 +178,365 @@
     "stock": 15,
     "isActive": true,
     "createdAt": "2026-05-20T10:30:00Z"
+  },
+  {
+    "id": 21,
+    "name": "Wireless Ergonomic Mouse",
+    "category": "Electronics",
+    "price": 34.99,
+    "stock": 80,
+    "isActive": true,
+    "createdAt": "2026-05-25T11:15:00Z"
+  },
+  {
+    "id": 22,
+    "name": "Bamboo Cutting Board Set",
+    "category": "Home & Kitchen",
+    "price": 27.50,
+    "stock": 65,
+    "isActive": true,
+    "createdAt": "2026-06-01T09:00:00Z"
+  },
+  {
+    "id": 23,
+    "name": "Adjustable Dumbbell Set",
+    "category": "Sports & Outdoors",
+    "price": 149.99,
+    "stock": 10,
+    "isActive": true,
+    "createdAt": "2026-06-04T14:20:00Z"
+  },
+  {
+    "id": 24,
+    "name": "Denim Jacket (Unisex)",
+    "category": "Apparel",
+    "price": 64.99,
+    "stock": 35,
+    "isActive": true,
+    "createdAt": "2026-06-10T16:45:00Z"
+  },
+  {
+    "id": 25,
+    "name": "Trail Running Shoes (Women)",
+    "category": "Footwear",
+    "price": 115.00,
+    "stock": 22,
+    "isActive": true,
+    "createdAt": "2026-06-15T08:30:00Z"
+  },
+  {
+    "id": 26,
+    "name": "Noise-Isolating Earbuds",
+    "category": "Electronics",
+    "price": 29.99,
+    "stock": 0,
+    "isActive": false,
+    "createdAt": "2026-06-20T12:10:00Z"
+  },
+  {
+    "id": 27,
+    "name": "Memory Foam Pillows (Set of 2)",
+    "category": "Home & Kitchen",
+    "price": 42.99,
+    "stock": 50,
+    "isActive": true,
+    "createdAt": "2026-06-28T10:00:00Z"
+  },
+  {
+    "id": 28,
+    "name": "Minimalist Wristwatch",
+    "category": "Accessories",
+    "price": 85.00,
+    "stock": 18,
+    "isActive": true,
+    "createdAt": "2026-07-02T15:05:00Z"
+  },
+  {
+    "id": 29,
+    "name": "Electric Water Kettle 1.7L",
+    "category": "Home & Kitchen",
+    "price": 31.99,
+    "stock": 75,
+    "isActive": true,
+    "createdAt": "2026-07-08T09:40:00Z"
+  },
+  {
+    "id": 30,
+    "name": "Mesh Office Task Chair",
+    "category": "Furniture",
+    "price": 129.99,
+    "stock": 25,
+    "isActive": true,
+    "createdAt": "2026-07-12T13:25:00Z"
+  },
+  {
+    "id": 31,
+    "name": "Sonic Facial Cleansing Brush",
+    "category": "Health & Personal Care",
+    "price": 39.95,
+    "stock": 40,
+    "isActive": true,
+    "createdAt": "2026-07-18T17:50:00Z"
+  },
+  {
+    "id": 32,
+    "name": "Camping Tent 4-Person",
+    "category": "Sports & Outdoors",
+    "price": 120.00,
+    "stock": 14,
+    "isActive": true,
+    "createdAt": "2026-07-22T08:15:00Z"
+  },
+  {
+    "id": 33,
+    "name": "Casual Canvas Sneakers",
+    "category": "Footwear",
+    "price": 45.00,
+    "stock": 60,
+    "isActive": true,
+    "createdAt": "2026-07-29T11:30:00Z"
+  },
+  {
+    "id": 34,
+    "name": "Smart Wi-Fi Security Camera",
+    "category": "Electronics",
+    "price": 49.99,
+    "stock": 95,
+    "isActive": true,
+    "createdAt": "2026-08-01T14:10:00Z"
+  },
+  {
+    "id": 35,
+    "name": "Stainless Steel Trash Can 50L",
+    "category": "Home & Kitchen",
+    "price": 69.99,
+    "stock": 0,
+    "isActive": false,
+    "createdAt": "2026-08-05T10:00:00Z"
+  },
+  {
+    "id": 36,
+    "name": "Wool Blend Winter Scarf",
+    "category": "Accessories",
+    "price": 21.50,
+    "stock": 110,
+    "isActive": true,
+    "createdAt": "2026-08-09T16:20:00Z"
+  },
+  {
+    "id": 37,
+    "name": "Aromatherapy Essential Oil Diffuser",
+    "category": "Home & Kitchen",
+    "price": 23.99,
+    "stock": 85,
+    "isActive": true,
+    "createdAt": "2026-08-14T07:45:00Z"
+  },
+  {
+    "id": 38,
+    "name": "High-Density Foam Roller",
+    "category": "Sports & Outdoors",
+    "price": 18.99,
+    "stock": 90,
+    "isActive": true,
+    "createdAt": "2026-08-18T12:00:00Z"
+  },
+  {
+    "id": 39,
+    "name": "Slim Leather Card Holder",
+    "category": "Accessories",
+    "price": 16.99,
+    "stock": 130,
+    "isActive": true,
+    "createdAt": "2026-08-22T09:10:00Z"
+  },
+  {
+    "id": 40,
+    "name": "Digital Kitchen Scale",
+    "category": "Home & Kitchen",
+    "price": 14.99,
+    "stock": 105,
+    "isActive": true,
+    "createdAt": "2026-08-27T15:35:00Z"
+  },
+  {
+    "id": 41,
+    "name": "USB-C Multi-Port Hub",
+    "category": "Electronics",
+    "price": 38.50,
+    "stock": 50,
+    "isActive": true,
+    "createdAt": "2026-09-01T10:20:00Z"
+  },
+  {
+    "id": 42,
+    "name": "Linen Duvet Cover Set (Full/Queen)",
+    "category": "Home & Kitchen",
+    "price": 89.99,
+    "stock": 20,
+    "isActive": true,
+    "createdAt": "2026-09-04T13:50:00Z"
+  },
+  {
+    "id": 43,
+    "name": "Athletic Compression Socks (3-Pack)",
+    "category": "Apparel",
+    "price": 17.99,
+    "stock": 140,
+    "isActive": true,
+    "createdAt": "2026-09-08T08:05:00Z"
+  },
+  {
+    "id": 44,
+    "name": "Portable Power Bank 20000mAh",
+    "category": "Electronics",
+    "price": 39.99,
+    "stock": 0,
+    "isActive": false,
+    "createdAt": "2026-09-12T16:30:00Z"
+  },
+  {
+    "id": 45,
+    "name": "Wooden Bookshelf 5-Tier",
+    "category": "Furniture",
+    "price": 159.00,
+    "stock": 12,
+    "isActive": true,
+    "createdAt": "2026-09-15T11:15:00Z"
+  },
+  {
+    "id": 46,
+    "name": "Water Resistant Windbreaker",
+    "category": "Apparel",
+    "price": 52.00,
+    "stock": 48,
+    "isActive": true,
+    "createdAt": "2026-09-19T14:40:00Z"
+  },
+  {
+    "id": 47,
+    "name": "Stainless Steel Measuring Spoons",
+    "category": "Home & Kitchen",
+    "price": 11.99,
+    "stock": 210,
+    "isActive": true,
+    "createdAt": "2026-09-22T09:25:00Z"
+  },
+  {
+    "id": 48,
+    "name": "Adjustable Laptop Stand",
+    "category": "Furniture",
+    "price": 28.99,
+    "stock": 70,
+    "isActive": true,
+    "createdAt": "2026-09-25T17:00:00Z"
+  },
+  {
+    "id": 49,
+    "name": "Infrared Cordless Heating Pad",
+    "category": "Health & Personal Care",
+    "price": 44.99,
+    "stock": 38,
+    "isActive": true,
+    "createdAt": "2026-09-28T10:45:00Z"
+  },
+  {
+    "id": 50,
+    "name": "Hiking Boots Waterproof",
+    "category": "Footwear",
+    "price": 135.00,
+    "stock": 16,
+    "isActive": true,
+    "createdAt": "2026-10-01T08:30:00Z"
+  },
+  {
+    "id": 51,
+    "name": "Air Fryer 5.8 Quart",
+    "category": "Home & Kitchen",
+    "price": 99.99,
+    "stock": 33,
+    "isActive": true,
+    "createdAt": "2026-10-02T12:00:00Z"
+  },
+  {
+    "id": 52,
+    "name": "Foldable Treadmill",
+    "category": "Sports & Outdoors",
+    "price": 389.99,
+    "stock": 8,
+    "isActive": true,
+    "createdAt": "2026-10-04T15:15:00Z"
+  },
+  {
+    "id": 53,
+    "name": "HD Webcam with Dual Microphone",
+    "category": "Electronics",
+    "price": 59.99,
+    "stock": 62,
+    "isActive": true,
+    "createdAt": "2026-10-05T09:30:00Z"
+  },
+  {
+    "id": 54,
+    "name": "Travel Duffel Bag 45L",
+    "category": "Accessories",
+    "price": 48.50,
+    "stock": 54,
+    "isActive": true,
+    "createdAt": "2026-10-06T14:10:00Z"
+  },
+  {
+    "id": 55,
+    "name": "Non-Stick Cookware Set (10-Piece)",
+    "category": "Home & Kitchen",
+    "price": 119.99,
+    "stock": 0,
+    "isActive": false,
+    "createdAt": "2026-10-07T11:05:00Z"
+  },
+  {
+    "id": 56,
+    "name": "Electric Body Groomer",
+    "category": "Health & Personal Care",
+    "price": 32.99,
+    "stock": 72,
+    "isActive": true,
+    "createdAt": "2026-10-08T16:25:00Z"
+  },
+  {
+    "id": 57,
+    "name": "Slip-On Loafers (Women)",
+    "category": "Footwear",
+    "price": 58.00,
+    "stock": 29,
+    "isActive": true,
+    "createdAt": "2026-10-09T10:00:00Z"
+  },
+  {
+    "id": 58,
+    "name": "Thermal Travel Tumbler 20oz",
+    "category": "Home & Kitchen",
+    "price": 19.99,
+    "stock": 160,
+    "isActive": true,
+    "createdAt": "2026-10-10T08:50:00Z"
+  },
+  {
+    "id": 59,
+    "name": "Under-Desk Footrest Ergonomic",
+    "category": "Furniture",
+    "price": 25.99,
+    "stock": 44,
+    "isActive": true,
+    "createdAt": "2026-10-11T13:40:00Z"
+  },
+  {
+    "id": 60,
+    "name": "Smart LED Light Strip 16.4ft",
+    "category": "Electronics",
+    "price": 22.50,
+    "stock": 98,
+    "isActive": true,
+    "createdAt": "2026-10-12T17:15:00Z"
   }
 ]
