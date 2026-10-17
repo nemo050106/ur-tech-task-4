@@ -10,10 +10,12 @@ export interface SortSelectProps {
 
 export default function SortSelect({ sort, setSort }: SortSelectProps) {
   const options = [
-    { label: "Name: A to Z", value: "name-asc" },
-    { label: "Name: Z to A", value: "name-desc" },
+    { label: "Title: A to Z", value: "name-asc" },
+    { label: "Title: Z to A", value: "name-desc" },
     { label: "Price: Low to High", value: "price-asc" },
     { label: "Price: High to Low", value: "price-desc" },
+    { label: "Highest Rated", value: "rating-desc" },
+    { label: "In Stock First", value: "stock-desc" },
     { label: "Newest First", value: "date-desc" },
     { label: "Oldest First", value: "date-asc" },
   ];

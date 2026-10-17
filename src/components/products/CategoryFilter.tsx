@@ -16,7 +16,10 @@ export default function CategoryFilter({
 }: CategoryFilterProps) {
   const options = [
     { label: "All Categories", value: "all" },
-    ...categories.map((c) => ({ label: c, value: c })),
+    ...categories.map((c) => ({
+      label: c.charAt(0).toUpperCase() + c.slice(1).replace(/-/g, " "),
+      value: c,
+    })),
   ];
 
   return (
