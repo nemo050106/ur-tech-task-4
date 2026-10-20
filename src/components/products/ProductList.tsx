@@ -7,7 +7,13 @@ import {
   filterByCategory,
   sortProducts,
 } from "@/lib/product";
-import { getProducts, addProduct, updateProduct, getProductCategories } from "@/lib/api/products";
+import {
+  getProducts,
+  addProduct,
+  updateProduct,
+  deleteProduct,
+  getProductCategories,
+} from "@/lib/api/products";
 import SearchBar from "./SearchBar";
 import CategoryFilter from "./CategoryFilter";
 import SortSelect from "./SortSelect";
@@ -101,6 +107,19 @@ export default function ProductList({
       };
     }
   }, [initialProducts]);
+
+  // Synchronize products on localStorage changes or custom update event
+  useEffect(() => {
+    const handleSync = () => {
+      loadProducts();
+    };
+    window.addEventListener("products-updated", handleSync);
+    window.addEventListener("storage", handleSync);
+    return () => {
+      window.removeEventListener("products-updated", handleSync);
+      window.removeEventListener("storage", handleSync);
+    };
+  }, [loadProducts]);
 
   // Fetch categories from API
   useEffect(() => {
@@ -219,10 +238,33 @@ export default function ProductList({
       setEditingProduct(null);
       setToastMessage({
         type: "success",
-        text: `Product #${editingProduct.id} updated successfully! (Simulated mutation via DummyJSON API)`,
+        text: `Product "${updated.title || editingProduct.title}" updated successfully!`,
       });
     } catch (err) {
       throw err; // Handled inside ProductForm
+    }
+  };
+
+  // Handler for deleting a product
+  const handleDeleteProduct = async (product: Product) => {
+    const title = product.title || product.name || "Product";
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${title}"?`
+    );
+    if (!confirmed) return;
+
+    try {
+      await deleteProduct(product.id);
+      setProducts((prev) => prev.filter((p) => p.id !== product.id));
+      setToastMessage({
+        type: "success",
+        text: `Product "${title}" was deleted successfully.`,
+      });
+    } catch {
+      setToastMessage({
+        type: "error",
+        text: `Failed to delete product "${title}".`,
+      });
     }
   };
 
@@ -384,6 +426,7 @@ export default function ProductList({
               key={product.id}
               product={product}
               onEdit={(prod) => setEditingProduct(prod)}
+              onDelete={handleDeleteProduct}
             />
           ))}
         </div>

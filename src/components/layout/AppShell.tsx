@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -17,6 +18,9 @@ interface NavLinkItem {
 }
 
 export default function AppShell({ children, title }: AppShellProps) {
+  const router = useRouter();
+  const { logout } = useAuth();
+
   // Mobile drawer state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   // User profile dropdown menu state
@@ -79,8 +83,27 @@ export default function AppShell({ children, title }: AppShellProps) {
   // Sidebar navigation configuration
   const navLinks: NavLinkItem[] = [
     {
-      name: "Dashboard",
+      name: "Store (Home)",
       href: "/",
+      icon: (active) => (
+        <svg
+          className={`h-5 w-5 ${active ? "text-indigo-600" : "text-slate-400"}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.8}
+            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+          />
+        </svg>
+      ),
+    },
+    {
+      name: "Dashboard",
+      href: "/dashboard",
       icon: (active) => (
         <svg
           className={`h-5 w-5 ${active ? "text-indigo-600" : "text-slate-400"}`}
@@ -348,10 +371,28 @@ export default function AppShell({ children, title }: AppShellProps) {
 
           {/* Top Bar Actions & User Avatar Menu */}
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600">
-              <span className="h-2 w-2 rounded-full bg-emerald-500" />
-              <span>Multi-Page ShopDesk</span>
-            </div>
+            <Link
+              href="/"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 transition-colors shadow-2xs"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              Storefront
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                router.push("/login");
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Logout
+            </button>
 
             {/* User Dropdown */}
             <div className="relative" ref={userMenuRef}>
@@ -442,10 +483,14 @@ export default function AppShell({ children, title }: AppShellProps) {
                   </div>
 
                   <div className="border-t border-slate-100 pt-1">
-                    <Link
-                      href="/login"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium text-rose-600 hover:bg-rose-50"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        logout();
+                        router.push("/login");
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 cursor-pointer"
                     >
                       <svg
                         className="h-4 w-4 text-rose-500"
@@ -461,7 +506,7 @@ export default function AppShell({ children, title }: AppShellProps) {
                         />
                       </svg>
                       Sign Out
-                    </Link>
+                    </button>
                   </div>
                 </div>
               )}

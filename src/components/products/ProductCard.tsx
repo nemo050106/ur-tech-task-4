@@ -12,6 +12,7 @@ import { formatPrice } from "@/lib/product";
 export interface ProductCardProps {
   product: Product;
   onEdit?: (product: Product) => void;
+  onDelete?: (product: Product) => void;
 }
 
 /**
@@ -19,9 +20,13 @@ export interface ProductCardProps {
  *
  * Displays individual product card in the responsive grid.
  * Includes thumbnail preview with fallback, rating, price, stock status,
- * link to detail page, and an Edit button to open the edit form.
+ * link to detail page, an Edit button, and a Delete button.
  */
-export default function ProductCard({ product, onEdit }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  onEdit,
+  onDelete,
+}: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
 
   const productTitle = product.title || product.name || "Untitled Product";
@@ -164,6 +169,30 @@ export default function ProductCard({ product, onEdit }: ProductCardProps) {
               variant="outline"
               className="hover:border-indigo-300 hover:text-indigo-600"
             />
+          )}
+
+          {onDelete && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onDelete(product)}
+              className="hover:border-rose-300 hover:text-rose-600 text-slate-500 px-2.5"
+              title="Delete Product"
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </Button>
           )}
         </div>
       </div>

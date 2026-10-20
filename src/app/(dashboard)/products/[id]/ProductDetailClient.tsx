@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -9,7 +10,7 @@ import ProductForm from "@/components/products/ProductForm";
 import EditProductButton from "@/components/products/EditProductButton";
 import { Product, CreateProductInput } from "@/types/product";
 import { formatPrice } from "@/lib/product";
-import { updateProduct } from "@/lib/api/products";
+import { updateProduct, deleteProduct } from "@/lib/api/products";
 
 export interface ProductDetailClientProps {
   initialProduct: Product;
@@ -18,6 +19,7 @@ export interface ProductDetailClientProps {
 export default function ProductDetailClient({
   initialProduct,
 }: ProductDetailClientProps) {
+  const router = useRouter();
   const [product, setProduct] = useState<Product>(initialProduct);
   const [isEditing, setIsEditing] = useState(false);
   const [activeImage, setActiveImage] = useState<string>(
@@ -275,6 +277,25 @@ export default function ProductDetailClient({
           </Link>
 
           <div className="flex items-center gap-3">
+            <Button
+              variant="danger"
+              size="md"
+              onClick={async () => {
+                const title = product.title || product.name || "Product";
+                const confirmed = window.confirm(
+                  `Are you sure you want to delete "${title}"?`
+                );
+                if (!confirmed) return;
+                try {
+                  await deleteProduct(product.id);
+                  router.push("/products");
+                } catch {
+                  setToastMessage("Failed to delete product.");
+                }
+              }}
+            >
+              Delete Product
+            </Button>
             <EditProductButton
               product={product}
               onEdit={() => setIsEditing(true)}

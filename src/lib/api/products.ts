@@ -5,305 +5,285 @@ import {
   ProductsResponse,
   ProductsQueryOptions,
 } from "@/types/product";
-import { normalizeProduct } from "@/lib/product";
+import {
+  normalizeProduct,
+  searchProducts,
+  filterByCategory,
+  sortProducts,
+} from "@/lib/product";
+import initialProductsData from "@/data/product.json";
+
+// Browser localStorage key for persistent product management
+const STORAGE_KEY = "shopdesk_products_local";
 
 /**
- * Returns the configured base API URL without trailing slash
+ * Returns true if code is running in the browser
  */
-export function getApiBaseUrl(): string {
-  const envUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (envUrl && envUrl.trim().length > 0) {
-    return envUrl.trim().replace(/\/+$/, "");
-  }
-  return "https://dummyjson.com";
+function isClient(): boolean {
+  return typeof window !== "undefined";
 }
 
 /**
- * Fetches products from DummyJSON API with optional pagination, search, or category filter.
- * Defaults to fetching all products (limit: 0) to support rich client-side search, filtering, and sorting.
+ * Loads products from localStorage.
+ * If running on the server or storage is not initialized yet,
+ * it falls back to the original src/data/product.json file.
+ */
+function loadAllProducts(): Product[] {
+  if (!isClient()) {
+    return (initialProductsData as unknown as Array<Partial<Product>>).map(
+      normalizeProduct
+    );
+  }
+
+  try {
+    const rawData = localStorage.getItem(STORAGE_KEY);
+    if (!rawData) {
+      // Initialize localStorage with all original products from product.json
+      const initialList = (
+        initialProductsData as unknown as Array<Partial<Product>>
+      ).map(normalizeProduct);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(initialList));
+      return initialList;
+    }
+
+    const parsed: unknown = JSON.parse(rawData);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return (parsed as Array<Partial<Product>>).map(normalizeProduct);
+    }
+
+    // If storage is an empty array (user deleted all products)
+    if (Array.isArray(parsed)) {
+      return [];
+    }
+
+    return (initialProductsData as unknown as Array<Partial<Product>>).map(
+      normalizeProduct
+    );
+  } catch (error) {
+    console.error("Error reading products from localStorage:", error);
+    return (initialProductsData as unknown as Array<Partial<Product>>).map(
+      normalizeProduct
+    );
+  }
+}
+
+/**
+ * Saves the product list back to localStorage
+ */
+function saveAllProducts(products: Product[]): void {
+  if (!isClient()) return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    window.dispatchEvent(new Event("products-updated"));
+  } catch (error) {
+    console.error("Failed to save products to localStorage:", error);
+  }
+}
+
+/**
+ * Fetches products from localStorage with search, category filtering, and sorting
  */
 export async function getProducts(
   options: ProductsQueryOptions = {}
 ): Promise<ProductsResponse> {
-  const baseUrl = getApiBaseUrl();
-  const limit = options.limit !== undefined ? options.limit : 0;
-  const skip = options.skip !== undefined ? options.skip : 0;
+  let products = loadAllProducts();
 
-  let url: string;
-
+  // Search filter
   if (options.search && options.search.trim()) {
-    url = `${baseUrl}/products/search?q=${encodeURIComponent(
-      options.search.trim()
-    )}&limit=${limit}&skip=${skip}`;
-  } else if (options.category && options.category !== "all") {
-    url = `${baseUrl}/products/category/${encodeURIComponent(
-      options.category
-    )}?limit=${limit}&skip=${skip}`;
-  } else {
-    url = `${baseUrl}/products?limit=${limit}&skip=${skip}`;
+    products = searchProducts(products, options.search);
   }
 
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      // Revalidate or cache config can be specified if needed
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch products: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const data: unknown = await response.json();
-
-    if (
-      typeof data === "object" &&
-      data !== null &&
-      "products" in data &&
-      Array.isArray((data as { products: unknown[] }).products)
-    ) {
-      const typedData = data as {
-        products: Array<Partial<Product>>;
-        total?: number;
-        skip?: number;
-        limit?: number;
-      };
-
-      const normalizedProducts = typedData.products.map((item) =>
-        normalizeProduct(item)
-      );
-
-      return {
-        products: normalizedProducts,
-        total: typedData.total ?? normalizedProducts.length,
-        skip: typedData.skip ?? skip,
-        limit: typedData.limit ?? limit,
-      };
-    }
-
-    throw new Error("Invalid response format received from products API");
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("An unexpected error occurred while fetching products");
+  // Category filter
+  if (options.category && options.category !== "all") {
+    products = filterByCategory(products, options.category);
   }
+
+  const total = products.length;
+
+  // Sorting
+  if (options.sortBy) {
+    const validFields = [
+      "title",
+      "name",
+      "price",
+      "rating",
+      "stock",
+      "createdAt",
+    ] as const;
+    type VF = (typeof validFields)[number];
+    const field: VF = validFields.includes(options.sortBy as VF)
+      ? (options.sortBy as VF)
+      : "title";
+    products = sortProducts(products, field, options.order ?? "asc");
+  }
+
+  // Pagination (limit = 0 means return all)
+  const skip = options.skip ?? 0;
+  const limit = options.limit && options.limit > 0 ? options.limit : 0;
+  const paginated = limit > 0 ? products.slice(skip, skip + limit) : products;
+
+  return {
+    products: paginated,
+    total,
+    skip,
+    limit: limit || total,
+  };
 }
 
 /**
- * Fetches a single product by ID from DummyJSON API
+ * Fetches a single product by ID from localStorage
  */
 export async function getProduct(id: number | string): Promise<Product> {
-  const baseUrl = getApiBaseUrl();
-  const numericId = Number(id);
+  const products = loadAllProducts();
+  const searchId = String(id);
+  const found = products.find(
+    (product) => String(product.id) === searchId
+  );
 
-  if (isNaN(numericId) || numericId <= 0) {
-    throw new Error(`Invalid product ID: ${id}`);
+  if (!found) {
+    throw new Error(`Product #${id} not found`);
   }
 
-  const url = `${baseUrl}/products/${numericId}`;
-
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch product #${id}: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const data = (await response.json()) as Partial<Product>;
-    return normalizeProduct(data);
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error(`An unexpected network error occurred while fetching product #${id}`);
-  }
+  return found;
 }
 
 /**
- * Fetches the list of product categories from DummyJSON
+ * Returns all unique categories present in the stored products
  */
 export async function getProductCategories(): Promise<string[]> {
-  const baseUrl = getApiBaseUrl();
-  const url = `${baseUrl}/products/category-list`;
-
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      cache: "no-store",
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch categories: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const data: unknown = await response.json();
-    if (Array.isArray(data)) {
-      return data.filter((item): item is string => typeof item === "string");
-    }
-
-    return [];
-  } catch (error) {
-    console.error("Error fetching product categories:", error);
-    return [];
-  }
+  const products = loadAllProducts();
+  const categoriesSet = new Set(
+    products.map((p) => p.category).filter(Boolean)
+  );
+  return Array.from(categoriesSet).sort();
 }
 
 /**
- * Adds a new product via POST /products/add
- * Note: DummyJSON simulates adding a product and returns the created product with a new ID.
+ * Adds a new product and saves it in localStorage
  */
 export async function addProduct(
   productData: CreateProductInput
 ): Promise<Product> {
-  const baseUrl = getApiBaseUrl();
-  const url = `${baseUrl}/products/add`;
-
-  // Validation before sending
   if (!productData.title || !productData.title.trim()) {
     throw new Error("Product title is required.");
   }
-  if (productData.price === undefined || isNaN(productData.price) || productData.price < 0) {
+  if (
+    productData.price === undefined ||
+    isNaN(productData.price) ||
+    productData.price < 0
+  ) {
     throw new Error("Product price must be a valid non-negative number.");
   }
-  if (productData.stock === undefined || isNaN(productData.stock) || productData.stock < 0) {
+  if (
+    productData.stock === undefined ||
+    isNaN(productData.stock) ||
+    productData.stock < 0
+  ) {
     throw new Error("Product stock must be a valid non-negative integer.");
   }
 
-  const payload = {
+  const products = loadAllProducts();
+
+  // Generate unique numeric ID
+  const maxId = products.reduce((max, p) => {
+    const num = Number(p.id);
+    return !isNaN(num) && num > max ? num : max;
+  }, 0);
+  const newId = maxId + 1;
+
+  const now = new Date().toISOString();
+  const newProduct = normalizeProduct({
+    ...productData,
+    id: newId,
     title: productData.title.trim(),
-    price: Number(productData.price),
+    name: productData.title.trim(),
+    price: Number(Number(productData.price).toFixed(2)),
     stock: Math.floor(Number(productData.stock)),
     category: productData.category?.trim() || "General",
     description: productData.description?.trim() || "",
-    brand: productData.brand?.trim() || undefined,
-    thumbnail: productData.thumbnail?.trim() || undefined,
-    images: productData.images && productData.images.length > 0 ? productData.images : undefined,
-    rating: productData.rating !== undefined ? Number(productData.rating) : 4.5,
-  };
+    brand: productData.brand?.trim() || "",
+    thumbnail: productData.thumbnail?.trim() || "",
+    images: productData.images?.length
+      ? productData.images
+      : productData.thumbnail
+      ? [productData.thumbnail.trim()]
+      : [],
+    rating:
+      productData.rating !== undefined ? Number(productData.rating) : 4.5,
+    createdAt: now,
+    isActive: true,
+  });
 
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to add product: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const created = (await response.json()) as Partial<Product>;
-    return normalizeProduct({
-      ...payload,
-      ...created,
-      // If DummyJSON did not return images/thumbnail, fallback to what was submitted
-      thumbnail: created.thumbnail || payload.thumbnail,
-      images: created.images || payload.images,
-    });
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error("An unexpected error occurred while adding the product.");
-  }
+  saveAllProducts([newProduct, ...products]);
+  return newProduct;
 }
 
 /**
- * Updates an existing product via PATCH /products/{id}
- * Note: DummyJSON simulates updating a product and returns the updated product.
+ * Updates an existing product in localStorage by ID
  */
 export async function updateProduct(
   id: number | string,
   productData: UpdateProductInput
 ): Promise<Product> {
-  const baseUrl = getApiBaseUrl();
-  const numericId = Number(id);
+  const products = loadAllProducts();
+  const searchId = String(id);
+  const index = products.findIndex(
+    (product) => String(product.id) === searchId
+  );
 
-  if (isNaN(numericId) || numericId <= 0) {
-    throw new Error(`Invalid product ID: ${id}`);
-  }
-
-  const url = `${baseUrl}/products/${numericId}`;
-
-  const payload: Record<string, unknown> = {};
-
-  if (productData.title !== undefined) {
-    if (!productData.title.trim()) {
-      throw new Error("Product title cannot be empty.");
-    }
-    payload.title = productData.title.trim();
-  }
-  if (productData.price !== undefined) {
-    const p = Number(productData.price);
-    if (isNaN(p) || p < 0) {
-      throw new Error("Product price must be a valid non-negative number.");
-    }
-    payload.price = p;
-  }
-  if (productData.stock !== undefined) {
-    const s = Number(productData.stock);
-    if (isNaN(s) || s < 0) {
-      throw new Error("Product stock must be a valid non-negative integer.");
-    }
-    payload.stock = Math.floor(s);
-  }
-  if (productData.category !== undefined) {
-    payload.category = productData.category.trim();
-  }
-  if (productData.description !== undefined) {
-    payload.description = productData.description.trim();
-  }
-  if (productData.brand !== undefined) {
-    payload.brand = productData.brand.trim();
-  }
-  if (productData.thumbnail !== undefined) {
-    payload.thumbnail = productData.thumbnail.trim();
+  if (index === -1) {
+    throw new Error(`Product #${id} not found.`);
   }
 
-  try {
-    const response = await fetch(url, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+  const existing = products[index];
+  const now = new Date().toISOString();
 
-    if (!response.ok) {
-      throw new Error(
-        `Failed to update product #${id}: ${response.status} ${response.statusText}`
-      );
-    }
+  const updated = normalizeProduct({
+    ...existing,
+    ...(productData.title !== undefined
+      ? { title: productData.title.trim(), name: productData.title.trim() }
+      : {}),
+    ...(productData.price !== undefined
+      ? { price: Number(Number(productData.price).toFixed(2)) }
+      : {}),
+    ...(productData.stock !== undefined
+      ? { stock: Math.floor(Number(productData.stock)) }
+      : {}),
+    ...(productData.category !== undefined
+      ? { category: productData.category.trim() }
+      : {}),
+    ...(productData.description !== undefined
+      ? { description: productData.description.trim() }
+      : {}),
+    ...(productData.brand !== undefined
+      ? { brand: productData.brand.trim() }
+      : {}),
+    ...(productData.thumbnail !== undefined
+      ? { thumbnail: productData.thumbnail.trim() }
+      : {}),
+    meta: {
+      ...existing.meta,
+      updatedAt: now,
+    },
+  });
 
-    const updated = (await response.json()) as Partial<Product>;
-    return normalizeProduct(updated);
-  } catch (error) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    throw new Error(`An unexpected error occurred while updating product #${id}.`);
-  }
+  const updatedList = [...products];
+  updatedList[index] = updated;
+  saveAllProducts(updatedList);
+
+  return updated;
+}
+
+/**
+ * Deletes a product from localStorage by ID
+ */
+export async function deleteProduct(id: number | string): Promise<boolean> {
+  const products = loadAllProducts();
+  const searchId = String(id);
+  const filtered = products.filter(
+    (product) => String(product.id) !== searchId
+  );
+
+  saveAllProducts(filtered);
+  return true;
 }
